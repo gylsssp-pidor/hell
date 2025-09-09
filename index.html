@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Текстовое приключение</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+	<div id="app">
+		<header class="app-header">
+			<h1>Текстовое приключение</h1>
+			<nav class="app-actions">
+				<button id="btn-save" title="Сохранить">Сохранить</button>
+				<button id="btn-load" title="Загрузить">Загрузить</button>
+				<button id="btn-restart" title="Начать заново">Заново</button>
+			</nav>
+		</header>
+		<main class="app-main">
+			<section id="story" class="story" aria-live="polite"></section>
+			<ul id="choices" class="choices"></ul>
+		</main>
+		<footer class="app-footer">
+			<span id="status" class="status" aria-live="polite"></span>
+		</footer>
+	</div>
+	<script src="./script.js"></script>
+</body>
+</html>
