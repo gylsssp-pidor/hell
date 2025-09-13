@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0b0b">
+    <title>Firebase Clicker Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-dark: #0b0b0b;
+            --bg-mid: #1a1a1a;
+            --panel: #ffffff;
+            --text: #0b0b0b;
+            --muted: #6b6b6b;
+            --accent: #000000;
+            --accent-rgb: 0, 0, 0;
+            --success: #00c853;
+            --warning: #ffab00;
+            --danger: #ff1744;
+            --info: #2979ff;
+            --prestige: #9c27b0;
+            --prestige-rgb: 156, 39, 176;
+            --shadow: rgba(0, 0, 0, 0.35);
+            --glass: rgba(255, 255, 255, 0.06);
+            --btn-size: 18px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            --bg-dark: #0b0b0b;
+            --bg-mid: #1a1a1a;
+            --panel: #1a1a1a;
+            --text: #ffffff;
+            --muted: #888888;
+            --accent: #dddddd;
+            --accent-rgb: 221, 221, 221;
+            --prestige: #ba68c8;
+            --prestige-rgb: 186, 104, 200;
+            --shadow: rgba(0, 0, 0, 0.35);
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0b0b0b 100%);
+            color: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><path d="M50 0 L100 50 L50 100 L0 50 Z" stroke="%23fff" fill="none" /></svg>');
+                background-size: 100px 100px;
+                pointer-events: none;
+                z-index: -1;
+            }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
+            color: var(--text);
+            box-shadow: 0 18px 40px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .updates-container {
+            width: 100%;
+            padding: 20px;
+            text-align: left;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+            .updates-container h3 {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--text);
+                margin-bottom: 15px;
+            }
+
+            .updates-container ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .updates-container li {
+                margin-bottom: 12px;
+                padding-left: 10px;
+                position: relative;
+                border-left: 2px solid var(--accent);
+                padding-left: 15px;
+            }
+
+        .top-strip {
+            height: 60px;
+            background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.03), rgba(var(--accent-rgb), 0.01));
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(var(--accent-rgb), 0.04);
+            font-weight: 600;
+            color: var(--muted);
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .tab-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tab-btn {
+            padding: 12px 5px;
+            background: transparent;
+            border: none;
+            color: #f5f5dc; /* Бело-бежевый текст */
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            -webkit-background-clip: unset; /* Сброс */
+            -webkit-text-fill-color: unset; /* Сброс */
+        }
+
+            .tab-btn:hover {
+                color: #fff; /* Усиление цвета при наведении */
+                background: transparent;
+            }
+
+            .tab-btn.active {
+                color: #f5f5dc;
+                background: linear-gradient(to right, #ba68c8, #9c27b0);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .tab-btn.active::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: conic-gradient(
+                    from 0deg,
+                    transparent 0deg 90deg,
+                    var(--accent) 90deg 180deg,
+                    transparent 180deg 270deg,
+                    var(--accent) 270deg 360deg
+                );
+                animation: tab-border-spin 4s linear infinite;
+                z-index: -1;
+            }
+
+            .tab-btn.active::after {
+                content: '';
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                right: 2px;
+                bottom: 2px;
+                background: var(--bg-dark);
+                z-index: -1;
+                border-radius: 12px 12px 0 0;
+            }
+
+        @keyframes tab-border-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .clicker-container {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        .btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: var(--btn-size);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all .2s ease;
+            user-select: none;
+            touch-action: manipulation;
+            color: #fff;
+            background: linear-gradient(145deg, #1d1d1d, #2a2a2a);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5), -5px -5px 10px rgba(45,45,45,0.2);
+            margin-bottom: 12px;
+        }
+
+        .btn-content {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .btn-info {
+            background: transparent;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            margin-left: 10px;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 200px;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        .btn-info:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn:hover {
+            background: linear-gradient(145deg, #2a2a2a, #1d1d1d);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5), -2px -2px 5px rgba(45,45,45,0.2), 0 0 10px #777;
+        }
+
+        .btn:active {
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -2px -2px 5px rgba(45,45,45,0.2);
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5), -5px -5px 10px rgba(45,45,45,0.2);
+        }
+
+        .btn-click {
+            background: linear-gradient(90deg, #555, #333);
+            color: var(--panel);
+            padding: 20px 44px;
+            font-size: 22px;
+            border-radius: 44px;
+            box-shadow: 0 20px 40px rgba(var(--accent-rgb), 0.14);
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            border: none;
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @media (max-width: 480px) {
+            .btn-click {
+                padding: 15px 30px;
+                font-size: 18px;
+                margin: 10px 0;
+            }
+        }
+
+        .btn-click:hover, .btn-click:focus {
+            transform: translateY(-4px) scale(1.05);
+            animation: none;
+        }
+
+        .btn-click:active {
+            transform: translateY(2px) scale(0.95);
+            box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.1);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .btn-click::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-click:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .btn-click:active::after {
+            animation: none;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(30, 30);
+                opacity: 0;
+            }
+        }
+
+        .click-counter {
+            font-size: 86px;
+            line-height: 0.9;
+            font-weight: 800;
+            color: var(--text);
+            text-shadow: 0 8px 18px rgba(var(--accent-rgb), 0.06);
+            margin: 18px 0;
+            text-align: center;
+            position: relative;
+            transition: var(--transition);
+        }
+
+            .click-counter span.fly {
+                position: absolute;
+                animation: flyUp 0.7s ease forwards;
+                font-weight: 700;
+                font-size: 20px;
+                color: var(--accent);
+                pointer-events: none;
+                z-index: 10;
+            }
+
+        @keyframes flyUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 480px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 10px 0;
+            }
+        }
+
+        .stat-box {
+            background: rgba(var(--accent-rgb), 0.02);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .notification-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        .notification {
+            background: var(--bg-mid);
+            color: var(--text);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .notification::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: var(--accent);
+            }
+
+            .notification.success::before {
+                background: var(--success);
+            }
+
+            .notification.error::before {
+                background: var(--danger);
+            }
+
+            .notification.warning::before {
+                background: var(--warning);
+            }
+
+            .notification.info::before {
+                background: var(--info);
+            }
+
+            .notification.prestige::before {
+                background: var(--prestige);
+            }
+
+            .notification i {
+                margin-right: 10px;
+                font-size: 20px;
+            }
+
+            .notification.success {
+                border-left: 4px solid var(--success);
+            }
+
+            .notification.error {
+                border-left: 4px solid var(--danger);
+            }
+
+            .notification.warning {
+                border-left: 4px solid var(--warning);
+            }
+
+            .notification.info {
+                border-left: 4px solid var(--info);
+            }
+
+            .notification.prestige {
+                border-left: 4px solid var(--prestige);
+            }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        /* Добавленные стили для формы входа/регистрации */
+        .form-container {
+            max-width: 420px;
+            width: 100%;
+            background: #1e1e1e;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        #auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-color: var(--bg-dark);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        #app-container {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .form-input::placeholder {
+                color: #888;
+            }
+
+            .form-input:focus {
+                outline: none;
+                border-color: #ba68c8;
+                box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.2);
+            }
+
+        .main-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            background: linear-gradient(90deg, #ba68c8, #9c27b0);
+            color: white;
+        }
+
+            .main-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #leaderboard-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaderboard-item:nth-child(1) {
+            background: linear-gradient(45deg, gold, #ffd700);
+            color: #0b0b0b;
+        }
+
+        .leaderboard-item:nth-child(2) {
+            background: linear-gradient(45deg, silver, #c0c0c0);
+            color: #0b0b0b;
+        }
+
+        .leaderboard-item:nth-child(3) {
+            background: linear-gradient(45deg, #cd7f32, #b87333);
+            color: #0b0b0b;
+        }
+        
+        /* Стили для модального окна */
+        .modal {
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--prestige);
+        }
+
+        .modal p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 flex-center min-h-screen p-4">
+
+    <div id="player-info-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3 id="modal-username"></h3>
+            <div class="stat-box full-width mb-3">
+                <div class="stat-value" id="modal-total-clicks"></div>
+                <div class="stat-label">Всего кликов</div>
+            </div>
+            <div class="stat-box full-width">
+                <div class="stat-value" id="modal-prestige-level"></div>
+                <div class="stat-label">Уровень престижа</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-container">
+        <div class="form-container">
+            <h2 id="form-title" class="text-3xl font-bold text-center mb-6 text-white">Вход</h2>
+            <div id="firebase-ui-auth-container" class="space-y-4">
+                <input type="text" id="username-input" placeholder="Имя пользователя (обязательно)" class="form-input">
+                <input type="email" id="email" placeholder="Электронная почта" class="form-input">
+                <input type="password" id="password" placeholder="Пароль" class="form-input">
+                <button id="auth-button" class="main-button">Войти</button>
+            </div>
+            <div class="mt-6 text-center text-sm text-gray-400">
+                <p id="toggle-form-text">Нет аккаунта? <a href="#" id="toggle-form-link" class="text-indigo-400 hover:text-indigo-300 font-medium">Зарегистрируйтесь</a></p>
+            </div>
+            <div id="error-message" class="mt-4 text-red-400 text-center text-sm hidden"></div>
+        </div>
+    </div>
+
+    <div id="app" style="display: none;">
+        <div class="top-strip">
+            <span id="user-status-text">Загрузка...</span>
+            <div style="display: flex; align-items: center; margin-left: auto;">
+                <span id="user-id-display" style="font-size: 10px; margin-right: 10px;"></span>
+                <button id="logout-button" class="text-white text-opacity-70 hover:text-opacity-100 transition-opacity" title="Выйти">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="clicker">Кликер</button>
+            <button class="tab-btn" data-tab="shop">Магазин</button>
+            <button class="tab-btn" data-tab="stats">Статистика</button>
+            <button class="tab-btn" data-tab="prestige">Престиж</button>
+
+            <button class="tab-btn" data-tab="upgrades">Улучшения</button>
+            <button class="tab-btn" data-tab="upgrades2">Доп. Магазин</button>
+            <button class="tab-btn" data-tab="leaderboard">Лидерборд</button>
+            <button class="tab-btn" data-tab="quests">Задания</button>
+
+            <button class="tab-btn" data-tab="bonuses">Бонусы</button>
+            <button class="tab-btn" data-tab="achievements">Достижения</button>
+            <button class="tab-btn" data-tab="updates">Обновления</button>
+        </div>
+
+        <div id="clicker" class="tab-content active clicker-container">
+            <div class="click-counter" id="clicks-display">0</div>
+            <button class="btn btn-click" id="main-click-btn">Кликни меня!</button>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="cps-display">0</div>
+                    <div class="stat-label">Кликов/сек</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="cpc-display">1</div>
+                    <div class="stat-label">Кликов/клик</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="shop" class="tab-content clicker-container" style="display: none;">
+            <h2>Магазин улучшений</h2>
+            <button class="btn" id="upgrade-cpc">
+                <span class="btn-content">
+                    Улучшить клик <br />
+                    (Цена: <span id="cpc-cost">10</span>)
+                </span>
+                <span class="btn-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="tooltip">Увеличивает количество кликов за клик на 1.</div>
+                </span>
+            </button>
+            <button class="btn" id="upgrade-cps">
+                <span class="btn-content">
+                    Купить авто-кликер <br />
+                    (Цена: <span id="cps-cost">100</span>)
+                </span>
+                <span class="btn-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="tooltip">Добавляет 1 клик в секунду автоматически.</div>
+                </span>
+            </button>
+            <button class="btn" id="upgrade-megaclicker">
+                <span class="btn-content">
+                    Купить Мега-кликер <br />
+                    (Цена: <span id="megaclicker-cost">5000</span>)
+                </span>
+                <span class="btn-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="tooltip">Мощное улучшение! Добавляет +10 к кликам за клик и +5 к кликам в секунду.</div>
+                </span>
+            </button>
+            <button class="btn" id="upgrade-super-clicker">
+                <span class="btn-content">
+                    Купить Супер-кликер <br />
+                    (Цена: <span id="super-clicker-cost">100000</span>)
+                </span>
+                <span class="btn-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="tooltip">Ультимативное улучшение! Добавляет +50 к кликам за клик и +10 к кликам в секунду.</div>
+                </span>
+            </button>
+            <button class="btn" id="upgrade-master-clicker">
+                <span class="btn-content">
+                    Купить Мастер-кликер <br />
+                    (Цена: <span id="master-clicker-cost">500000</span>)
+                </span>
+                <span class="btn-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="tooltip">Легендарное улучшение! Добавляет +100 к кликам за клик и +20 к кликам в секунду.</div>
+                </span>
+            </button>
+        </div>
+
+        <div id="upgrades" class="tab-content clicker-container" style="display: none;">
+            <h2>Улучшения</h2>
+            <p>Эта вкладка пока пуста. Продолжайте кликать!</p>
+        </div>
+
+        <div id="upgrades2" class="tab-content clicker-container" style="display: none;">
+            <h2>Доп. Магазин</h2>
+            <p>Скоро здесь появятся новые крутые улучшения!</p>
+        </div>
+
+        <div id="stats" class="tab-content clicker-container" style="display: none;">
+            <h2>Ваша статистика</h2>
+            <div class="stat-box full-width">
+                <div class="stat-value" id="total-clicks-display">0</div>
+                <div class="stat-label">Всего кликов</div>
+            </div>
+            <div class="stat-box full-width">
+                <div class="stat-value" id="prestige-level-display">0</div>
+                <div class="stat-label">Уровень престижа</div>
+            </div>
+            <div class="stat-box full-width">
+                <div class="stat-value" id="prestige-bonus-display">1x</div>
+                <div class="stat-label">Бонус престижа</div>
+            </div>
+        </div>
+
+        <div id="prestige" class="tab-content clicker-container" style="display: none;">
+            <h2>Престиж</h2>
+            <p>Сбросьте прогресс, чтобы получить постоянный бонус к кликам.</p>
+            <div class="stat-box full-width">
+                <div class="stat-value">Требуется кликов: 1,000,000</div>
+            </div>
+            <button class="btn btn-prestige" id="prestige-btn">
+                Войти в престиж
+            </button>
+        </div>
+
+        <div id="updates" class="tab-content updates-container" style="display: none;">
+            <h3>Обновления</h3>
+            <ul>
+                 <li>
+                    <strong>13/09/2025 04:34 UTC</strong><br />
+                    Добавлено полноценное модальное окно для просмотра статистики игроков в лидерборде. Устранена ошибка, из-за которой уведомления не исчезали. Цвет текста вкладок изменен на бело-бежевый.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:30 UTC</strong><br />
+                    Добавлена возможность просмотра статистики игроков в лидерборде. Поле "Имя пользователя" в форме регистрации сделано обязательным и перемещено наверх.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:26 UTC</strong><br />
+                    Добавлен градиентный текст на вкладки и кнопка выхода из аккаунта в верхнюю панель.
+                </li>
+                <li>
+                    <strong>13/09/2025 02:23 UTC</strong><br />
+                    Добавлен градиентный текст для всех вкладок. Реализована возможность добавления никнейма в форму регистрации.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:20 UTC</strong><br />
+                    Добавлена анимация "крутящейся обводки" для активной вкладки. Эффект реализован с помощью CSS-анимации и конического градиента.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:18 UTC</strong><br />
+                    Исправлена ошибка `TypeError: Cannot read properties of null (reading 'style')`, которая возникала при попытке перейти во вкладку «Настройки». Кнопка «Настройки» была полностью удалена, так как соответствующая вкладка была убрана в предыдущих версиях.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:13 UTC</strong><br />
+                    Исправлена ошибка "permission_denied" для лидерборда. Теперь вы можете сохранять и загружать данные в лидерборд. Внесена запись об этом.
+                </li>
+                <li>
+                    <strong>13/09/2025 04:11 UTC</strong><br />
+                    Исправлена ошибка `TypeError: Cannot read properties of null` путем переноса обновления стиля кнопки "Престиж" в функцию `updateUI`. Реализована система лидербордов. В магазин добавлены два новых улучшения: "Супер-кликер" и "Мастер-кликер".
+                </li>
+                <li>
+                    <strong>13/09/2025 02:06 UTC</strong><br />
+                    Исправлена ошибка `TypeError: Cannot set properties of null` путем исправления ID элемента 'user-id' на 'user-id-display'.
+                </li>
+                <li>
+                    <strong>13/09/2025 02:06 UTC</strong><br />
+                    Исправлена ошибка `TypeError: Cannot read properties of null` путем переноса обработчиков событий в блок, который выполняется после загрузки пользовательского интерфейса.
+                </li>
+                <li>
+                    <strong>13 сентября 2025 г.</strong><br />
+                    Дизайн заднего фона обновлен. Вкладка "Настройки" полностью удалена из-за отсутствия настроек, кроме шрифта.
+                </li>
+                <li>
+                    <strong>16 сентября 2025 г.</strong><br />
+                    Уведомления в правом верхнем углу теперь автоматически исчезают через 3 секунды.
+                </li>
+                <li>
+                    <strong>15 сентября 2025 г.</strong><br />
+                    Добавлен новый предмет в магазин - "Мега-кликер", который увеличивает и CPC, и CPS.
+                </li>
+                <li>
+                    <strong>14 сентября 2025 г.</strong><br />
+                    Сетка навигации расширена до 4x3. Добавлена новая вкладка "Доп. Магазин".
+                </li>
+                <li>
+                    <strong>13 сентября 2025 г.</strong><br />
+                    Добавлена отдельная вкладка "Обновления" в сетку навигации.
+                </li>
+                <li>
+                    <strong>12 сентября 2025 г.</strong><br />
+                    Улучшены анимации кнопок и навигация в виде сетки 3x3. Добавлена новая вкладка "Настройки" с функциями сохранения и загрузки.
+                </li>
+            </ul>
+        </div>
+
+        <div id="achievements" class="tab-content clicker-container" style="display: none;">
+            <h2>Достижения</h2>
+            <p>Эта вкладка пока пуста. Продолжайте кликать!</p>
+        </div>
+
+        <div id="leaderboard" class="tab-content clicker-container" style="display: none;">
+            <h2>Лидерборд</h2>
+            <p>Загрузка данных...</p>
+            <ul id="leaderboard-list"></ul>
+        </div>
+
+        <div id="quests" class="tab-content clicker-container" style="display: none;">
+            <h2>Задания</h2>
+            <p>Эта вкладка пока пуста. Скоро здесь появятся ежедневные задания.</p>
+        </div>
+
+        <div id="bonuses" class="tab-content clicker-container" style="display: none;">
+            <h2>Бонусы</h2>
+            <p>Эта вкладка пока пуста. Скоро здесь появятся временные бонусы.</p>
+        </div>
+    </div>
+
+    <div class="notification-container" id="notification-container"></div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+        // Инициализация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPFBkLQI7Voacyx-168aE1mzKMXVOK0Mo",
+            authDomain: "trata-2041c.firebaseapp.com",
+            projectId: "trata-2041c",
+            storageBucket: "trata-2041c.firebasestorage.app",
+            messagingSenderId: "898017349460",
+            appId: "1:898017349460:web:324bb49f7aaf1430b682c1",
+            measurementId: "G-RXCXHP0MHG"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let userId;
+        let username;
+        let isInitialized = false;
+        let saveInterval;
+
+        // Игровые переменные
+        let clicks = 0;
+        let cpc = 1;
+        let cps = 0;
+        let cpcCost = 10;
+        let cpsCost = 100;
+        let megaClickerCost = 5000;
+        let superClickerCost = 100000;
+        let masterClickerCost = 500000;
+        let totalClicks = 0;
+        let prestigeLevel = 0;
+        let prestigeBonus = 1;
+        const prestigeRequirement = 1000000;
+
+        // DOM-элементы
+        const mainClickBtn = document.getElementById('main-click-btn');
+        const clicksDisplay = document.getElementById('clicks-display');
+        const cpcDisplay = document.getElementById('cpc-display');
+        const cpsDisplay = document.getElementById('cps-display');
+        const cpcUpgradeBtn = document.getElementById('upgrade-cpc');
+        const cpcCostDisplay = document.getElementById('cpc-cost');
+        const cpsUpgradeBtn = document.getElementById('upgrade-cps');
+        const cpsCostDisplay = document.getElementById('cps-cost');
+        const megaClickerUpgradeBtn = document.getElementById('upgrade-megaclicker');
+        const megaClickerCostDisplay = document.getElementById('megaclicker-cost');
+        const superClickerUpgradeBtn = document.getElementById('upgrade-super-clicker');
+        const superClickerCostDisplay = document.getElementById('super-clicker-cost');
+        const masterClickerUpgradeBtn = document.getElementById('upgrade-master-clicker');
+        const masterClickerCostDisplay = document.getElementById('master-clicker-cost');
+        const totalClicksDisplay = document.getElementById('total-clicks-display');
+        const prestigeLevelDisplay = document.getElementById('prestige-level-display');
+        const prestigeBonusDisplay = document.getElementById('prestige-bonus-display');
+        const prestigeBtn = document.getElementById('prestige-btn');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const formTitle = document.getElementById('form-title');
+        const authButton = document.getElementById('auth-button');
+        const toggleFormLink = document.getElementById('toggle-form-link');
+        const toggleFormText = document.getElementById('toggle-form-text');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const usernameInput = document.getElementById('username-input');
+        const errorMessage = document.getElementById('error-message');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const logoutButton = document.getElementById('logout-button');
+        
+        // DOM-элементы для модального окна
+        const playerInfoModal = document.getElementById('player-info-modal');
+        const modalUsername = document.getElementById('modal-username');
+        const modalTotalClicks = document.getElementById('modal-total-clicks');
+        const modalPrestigeLevel = document.getElementById('modal-prestige-level');
+        const modalCloseBtn = document.querySelector('.modal-close');
+
+        let isLogin = true;
+
+        // Путь к данным в Realtime Database
+        function getUserDataRef(uid) {
+            return ref(db, `users/${uid}/gameData`);
+        }
+
+        // Обновление UI
+        function updateUI() {
+            clicksDisplay.textContent = Math.floor(clicks);
+            cpcDisplay.textContent = (cpc * prestigeBonus).toFixed(1);
+            cpsDisplay.textContent = (cps * prestigeBonus).toFixed(1);
+            cpcCostDisplay.textContent = cpcCost;
+            cpsCostDisplay.textContent = cpsCost;
+            megaClickerCostDisplay.textContent = megaClickerCost;
+            superClickerCostDisplay.textContent = superClickerCost;
+            masterClickerCostDisplay.textContent = masterClickerCost;
+            totalClicksDisplay.textContent = Math.floor(totalClicks);
+            prestigeLevelDisplay.textContent = prestigeLevel;
+            prestigeBonusDisplay.textContent = `${prestigeBonus.toFixed(1)}x`;
+
+            if (prestigeBtn) {
+                if (clicks >= prestigeRequirement) {
+                    prestigeBtn.disabled = false;
+                    prestigeBtn.style.background = 'linear-gradient(45deg, var(--prestige), #93579b)';
+                    prestigeBtn.style.color = 'white';
+                } else {
+                    prestigeBtn.disabled = true;
+                    prestigeBtn.style.background = 'gray';
+                    prestigeBtn.style.color = 'white';
+                }
+            }
+
+            cpcUpgradeBtn.disabled = clicks < cpcCost;
+            cpsUpgradeBtn.disabled = clicks < cpsCost;
+            megaClickerUpgradeBtn.disabled = clicks < megaClickerCost;
+            superClickerUpgradeBtn.disabled = clicks < superClickerCost;
+            masterClickerUpgradeBtn.disabled = clicks < masterClickerCost;
+        }
+
+        // Сохранение игры
+        async function saveGame() {
+            if (!userId) return;
+            try {
+                const dataToSave = {
+                    clicks, cpc, cps, cpcCost, cpsCost, megaClickerCost, superClickerCost, masterClickerCost, totalClicks, prestigeLevel, prestigeBonus, username: username || 'Игрок'
+                };
+                await set(getUserDataRef(userId), dataToSave);
+                // Обновление данных в лидерборде
+                await set(ref(db, `leaderboard/${userId}`), {
+                    username: username || 'Игрок',
+                    totalClicks: totalClicks,
+                    prestigeLevel: prestigeLevel
+                });
+                console.log("Игра сохранена!");
+            } catch (error) {
+                console.error("Ошибка сохранения игры: ", error);
+                showNotification('Ошибка сохранения!', 'error');
+            }
+        }
+
+        // Загрузка игры
+        async function loadGame() {
+            if (!userId) return;
+            try {
+                const snapshot = await get(getUserDataRef(userId));
+                if (snapshot.exists()) {
+                    const gameData = snapshot.val();
+                    clicks = gameData.clicks || 0;
+                    cpc = gameData.cpc || 1;
+                    cps = gameData.cps || 0;
+                    cpcCost = gameData.cpcCost || 10;
+                    cpsCost = gameData.cpsCost || 100;
+                    megaClickerCost = gameData.megaClickerCost || 5000;
+                    superClickerCost = gameData.superClickerCost || 100000;
+                    masterClickerCost = gameData.masterClickerCost || 500000;
+                    totalClicks = gameData.totalClicks || 0;
+                    prestigeLevel = gameData.prestigeLevel || 0;
+                    prestigeBonus = gameData.prestigeBonus || 1;
+                    username = gameData.username || 'Игрок';
+                    updateUI();
+                    showNotification(`С возвращением, ${username}!`, 'success');
+                } else {
+                    showNotification('Нет сохранённых данных. Начинаем новую игру!', 'info');
+                    resetGameData();
+                }
+            } catch (error) {
+                console.error("Ошибка загрузки игры: ", error);
+                showNotification('Ошибка загрузки!', 'error');
+            }
+        }
+
+        // Загрузка и отображение лидерборда
+        async function loadLeaderboard() {
+            leaderboardList.innerHTML = 'Загрузка...';
+            const leaderboardRef = ref(db, 'leaderboard');
+            try {
+                const snapshot = await get(leaderboardRef);
+                if (snapshot.exists()) {
+                    const players = [];
+                    snapshot.forEach(childSnapshot => {
+                        const player = childSnapshot.val();
+                        players.push({
+                            ...player,
+                            id: childSnapshot.key
+                        });
+                    });
+                    players.sort((a, b) => b.totalClicks - a.totalClicks);
+                    leaderboardList.innerHTML = '';
+                    const topPlayers = players.slice(0, 10);
+                    topPlayers.forEach((player, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'leaderboard-item';
+                        li.innerHTML = `
+                            <span>${index + 1}. ${player.username}</span>
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 10px;">${Math.floor(player.totalClicks)}</span>
+                                <button class="btn-info" data-uid="${player.id}" title="Информация о пользователе">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        `;
+                        leaderboardList.appendChild(li);
+                    });
+
+                    // Add event listeners to the new info buttons
+                    document.querySelectorAll('.btn-info').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const uid = e.currentTarget.dataset.uid;
+                            showPlayerInfo(uid);
+                        });
+                    });
+
+                } else {
+                    leaderboardList.innerHTML = '<li>Лидерборд пуст. Станьте первым!</li>';
+                }
+            } catch (error) {
+                console.error("Ошибка загрузки лидерборда: ", error);
+                leaderboardList.innerHTML = '<li>Ошибка загрузки лидерборда.</li>';
+            }
+        }
+
+        async function showPlayerInfo(uid) {
+            try {
+                const snapshot = await get(ref(db, `users/${uid}/gameData`));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    modalUsername.textContent = data.username;
+                    modalTotalClicks.textContent = Math.floor(data.totalClicks);
+                    modalPrestigeLevel.textContent = data.prestigeLevel;
+                    playerInfoModal.style.display = 'flex';
+                } else {
+                    showNotification('Информация о пользователе не найдена.', 'warning');
+                }
+            } catch (error) {
+                console.error("Ошибка получения данных игрока: ", error);
+                showNotification('Не удалось получить информацию о пользователе.', 'error');
+            }
+        }
+
+        // Закрытие модального окна
+        modalCloseBtn.addEventListener('click', () => {
+            playerInfoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == playerInfoModal) {
+                playerInfoModal.style.display = 'none';
+            }
+        });
+
+        // Функция для сброса локальных переменных игры
+        function resetGameData() {
+            clicks = 0;
+            cpc = 1;
+            cps = 0;
+            cpcCost = 10;
+            cpsCost = 100;
+            megaClickerCost = 5000;
+            superClickerCost = 100000;
+            masterClickerCost = 500000;
+            totalClicks = 0;
+            prestigeLevel = 0;
+            prestigeBonus = 1;
+            updateUI();
+        }
+
+        // Сброс игры (с сохранением в базе)
+        async function resetGame() {
+            if (!userId) return;
+            try {
+                resetGameData();
+                await saveGame();
+                showNotification('Игра сброшена!', 'info');
+            } catch (error) {
+                console.error("Ошибка сброса игры: ", error);
+                showNotification('Ошибка сброса!', 'error');
+            }
+        }
+
+        // Обработчик кнопки аутентификации
+        authButton.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const customUsername = usernameInput.value;
+
+            if (!email || !password) {
+                showError('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            if (!isLogin && !customUsername) {
+                showError('Имя пользователя является обязательным.');
+                return;
+            }
+
+            try {
+                if (isLogin) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    const initialData = {
+                        clicks: 0,
+                        cpc: 1,
+                        cps: 0,
+                        cpcCost: 10,
+                        cpsCost: 100,
+                        megaClickerCost: 5000,
+                        superClickerCost: 100000,
+                        masterClickerCost: 500000,
+                        totalClicks: 0,
+                        prestigeLevel: 0,
+                        prestigeBonus: 1,
+                        username: customUsername
+                    };
+                    await set(getUserDataRef(user.uid), initialData);
+                }
+                clearError();
+            } catch (error) {
+                console.error(error);
+                let message = 'Произошла неизвестная ошибка. Пожалуйста, попробуйте снова.';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        message = 'Электронная почта уже используется. Пожалуйста, войдите или используйте другую почту.';
+                        break;
+                    case 'auth/invalid-email':
+                        message = 'Неверный формат электронной почты.';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        message = 'Неверная электронная почта или пароль.';
+                        break;
+                    case 'auth/weak-password':
+                        message = 'Пароль должен содержать не менее 6 символов.';
+                        break;
+                }
+                showError(message);
+            }
+        });
+
+        // Обработчик кнопки выхода
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    console.error('Ошибка при выходе:', error);
+                    showError('Не удалось выйти из системы.');
+                }
+            });
+        }
+
+
+        // Обработчик переключения формы
+        toggleFormLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            updateFormUI();
+            clearError();
+        });
+
+        // Обновление UI формы входа/регистрации
+        function updateFormUI() {
+            if (isLogin) {
+                formTitle.textContent = 'Вход';
+                authButton.textContent = 'Войти';
+                toggleFormText.innerHTML = 'Нет аккаунта? <a href="#" id="toggle-form-link" class="text-indigo-400 hover:text-indigo-300 font-medium">Зарегистрируйтесь</a>';
+                usernameInput.style.display = 'none';
+                usernameInput.required = false;
+            } else {
+                formTitle.textContent = 'Регистрация';
+                authButton.textContent = 'Зарегистрироваться';
+                toggleFormText.innerHTML = 'Уже есть аккаунт? <a href="#" id="toggle-form-link" class="text-indigo-400 hover:text-indigo-300 font-medium">Войдите</a>';
+                usernameInput.style.display = 'block';
+                usernameInput.required = true;
+            }
+            document.getElementById('toggle-form-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                isLogin = !isLogin;
+                updateFormUI();
+            });
+        }
+        updateFormUI();
+
+        // Прослушиватель состояния аутентификации
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = user.uid;
+
+                // Получаем имя пользователя из RTDB
+                onValue(ref(db, `users/${userId}/gameData/username`), (snapshot) => {
+                    username = snapshot.val() || 'Игрок';
+                    document.getElementById('user-status-text').textContent = `Привет, ${username}!`;
+                }, { onlyOnce: true });
+
+                appContainer.style.display = 'flex';
+                authContainer.style.display = 'none';
+
+                isInitialized = true;
+                if (saveInterval) clearInterval(saveInterval);
+                saveInterval = setInterval(saveGame, 5000);
+
+                loadGame();
+
+                // Добавляем обработчики событий после загрузки UI
+                if (prestigeBtn) {
+                    prestigeBtn.addEventListener('click', () => {
+                        if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+                        //handlePrestige();
+                    });
+                }
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tabId = button.dataset.tab;
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        tabContents.forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        const targetContent = document.getElementById(tabId);
+                        if (targetContent) {
+                            targetContent.style.display = 'flex';
+                        }
+                        if (tabId === 'leaderboard') {
+                            loadLeaderboard();
+                        }
+                    });
+                });
+
+            } else {
+                userId = null;
+                appContainer.style.display = 'none';
+                authContainer.style.display = 'flex';
+                isInitialized = false;
+                if (saveInterval) clearInterval(saveInterval);
+                updateFormUI();
+            }
+            clearError();
+        });
+
+        // Вспомогательные функции
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function clearError() {
+            errorMessage.textContent = '';
+            errorMessage.classList.add('hidden');
+        }
+
+        // Игровые события
+        mainClickBtn.addEventListener('click', () => {
+            if (!isInitialized) {
+                showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+                return;
+            }
+            clicks += cpc * prestigeBonus;
+            totalClicks += cpc * prestigeBonus;
+            updateUI();
+            const flySpan = document.createElement('span');
+            flySpan.textContent = `+${(cpc * prestigeBonus).toFixed(1)}`;
+            flySpan.classList.add('fly');
+            mainClickBtn.appendChild(flySpan);
+            setTimeout(() => flySpan.remove(), 700);
+        });
+
+        // Остальные обработчики событий
+        cpcUpgradeBtn.addEventListener('click', () => {
+            if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+            if (clicks >= cpcCost) {
+                clicks -= cpcCost;
+                cpc += 1;
+                cpcCost = Math.round(cpcCost * 1.5);
+                updateUI();
+                saveGame();
+                showNotification('Улучшение клика куплено!', 'success');
+            } else {
+                showNotification('Недостаточно кликов!', 'error');
+            }
+        });
+
+        cpsUpgradeBtn.addEventListener('click', () => {
+            if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+            if (clicks >= cpsCost) {
+                clicks -= cpsCost;
+                cps += 1;
+                cpsCost = Math.round(cpsCost * 1.5);
+                updateUI();
+                saveGame();
+                showNotification('Авто-кликер куплен!', 'success');
+            } else {
+                showNotification('Недостаточно кликов!', 'error');
+            }
+        });
+
+        megaClickerUpgradeBtn.addEventListener('click', () => {
+            if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+            if (clicks >= megaClickerCost) {
+                clicks -= megaClickerCost;
+                cpc += 10;
+                cps += 5;
+                megaClickerCost = Math.round(megaClickerCost * 2);
+                updateUI();
+                saveGame();
+                showNotification('Мега-кликер куплен!', 'success');
+            } else {
+                showNotification('Недостаточно кликов!', 'error');
+            }
+        });
+
+        superClickerUpgradeBtn.addEventListener('click', () => {
+            if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+            if (clicks >= superClickerCost) {
+                clicks -= superClickerCost;
+                cpc += 50;
+                cps += 10;
+                superClickerCost = Math.round(superClickerCost * 2.5);
+                updateUI();
+                saveGame();
+                showNotification('Супер-кликер куплен!', 'success');
+            } else {
+                showNotification('Недостаточно кликов!', 'error');
+            }
+        });
+
+        masterClickerUpgradeBtn.addEventListener('click', () => {
+            if (!isInitialized) return showNotification('Пожалуйста, войдите в аккаунт!', 'warning');
+            if (clicks >= masterClickerCost) {
+                clicks -= masterClickerCost;
+                cpc += 100;
+                cps += 20;
+                masterClickerCost = Math.round(masterClickerCost * 3);
+                updateUI();
+                saveGame();
+                showNotification('Мастер-кликер куплен!', 'success');
+            } else {
+                showNotification('Недостаточно кликов!', 'error');
+            }
+        });
+
+        // Уведомления
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.classList.add('notification', type);
+            notification.innerHTML = `<i class="fas fa-${getIconForType(type)}"></i><span>${message}</span>`;
+            container.prepend(notification);
+            // Упрощенная логика для гарантированного исчезновения
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function getIconForType(type) {
+            switch (type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'info': return 'info-circle';
+                case 'prestige': return 'star';
+                default: return 'bell';
+            }
+        }
+    </script>
+</body>
+</html>
